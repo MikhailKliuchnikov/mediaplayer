@@ -13,10 +13,18 @@ btnPlay.addEventListener("click", () => {
   if (audio.src === "") {
     loadTrack(currentIndex);
   }
-  audio.paused ? audio.play() : audio.pause();
-
-  // TODO: Swapping UI icons
+  const icon = btnPlay.querySelector("span");
+  if (audio.paused) {
+    audio.play();
+    icon.innerText = "pause";
+    icon.className = "material-icons";
+  } else {
+    audio.pause();
+    icon.innerText = "play_circle_filled";
+    icon.className = "material-icons";
+  }
 });
+
 btnPrev.addEventListener("click", () => {
   goPrev();
 });
@@ -24,13 +32,33 @@ btnNext.addEventListener("click", () => {
   goNext();
 });
 btnRepeat.addEventListener("click", () => {
-  repeatMode =
-    repeatMode === "off" ? "all" : repeatMode === "all" ? "one" : "off";
-  // TODO: icons
+  if (repeatMode === "off") {
+    repeatMode = "all";
+  } else if (repeatMode === "all") {
+    repeatMode = "one";
+  } else {
+    repeatMode = "off";
+  }
+
+  const repeatIcon = btnRepeat.querySelector("span");
+  if (repeatMode === "all") {
+    repeatIcon.innerText = "repeat";
+    repeatIcon.style.color = "white";
+  } else if (repeatMode === "one") {
+    repeatIcon.innerText = "repeat_one";
+    repeatIcon.style.color = "white";
+  } else {
+    repeatIcon.innerText = "repeat";
+    repeatIcon.style.color = "gray";
+  }
 });
 btnShuffle.addEventListener("click", () => {
   isShuffling = !isShuffling;
-  // TODO: ui
+  if(isShuffling){
+    btnShuffle.querySelector("span").style.color = "white";
+  } else {
+    btnShuffle.querySelector("span").style.color = "gray";
+  }
 });
 
 // Global variables
@@ -39,73 +67,6 @@ let isShuffling = false;
 let repeatMode = "off"; // "off" / "one" / "all"
 const audio = document.getElementById("audio");
 let currentIndex = 0;
-
-// What is loaded on page load
-
-const tracks = [
-  {
-    title: "Specialz",
-    artist: "Jujutsu Kaisen",
-    source: "mp3/King_Gnu_-_SPECIALZ_English_cover_(mp3.pm).mp3",
-    cover: "thumbs/specials.jpg",
-  },
-  {
-    title: "Heavy is the crown",
-    artist: "Linkin Park",
-    source: "mp3/Heavy Is The Crown.mp3",
-    cover: "thumbs/heavy_is_the_crown_thumb.jpg",
-  },
-  {
-    title: "Awaken",
-    artist: "League of Legends",
-    source: "mp3/League of Legends - Awaken.mp3",
-    cover: "thumbs/league class.jpeg",
-  },
-  {
-    title: "Legends never die (remix)",
-    artist: "League of Legends",
-    source: "mp3/League of Legends - Legends Never Die - (Remix).mp3",
-    cover: "thumbs/league class.jpeg",
-  },
-  {
-    title: "Legends never die",
-    artist: "League of Legends",
-    source: "mp3/League of Legends - Legends Never Die.mp3",
-    cover: "thumbs/league class.jpeg",
-  },
-  {
-    title: "Rise - (remix)",
-    artist: "League of Legends",
-    source: "mp3/League of Legends - RISE - Remix.mp3",
-    cover: "thumbs/rise.jpg",
-  },
-  {
-    title: "Rise",
-    artist: "League of Legends",
-    source: "mp3/League of Legends - RISE.mp3",
-    cover: "thumbs/rise.jpg",
-  },
-  {
-    title: "Warriors",
-    artist: "League of Legends",
-    source: "mp3/League of Legends - Warriors.mp3",
-    cover: "thumbs/league class.jpeg",
-  },
-  {
-    title: "Where our blue is",
-    artist: "Tatsuya Kitani",
-    source: "mp3/Diego_Mitre_Music_-_Jujutsu_Kaisen_Season_2_OP_Ao_no_Sumika_Where_Our_Blue_Is_Orc_(mp3.pm).mp3",
-    cover: "thumbs/WhereOurBlueIsNormal.jpg"
-  }
-];
-tracks.forEach((track, index) => {
-  track.trackIndex = index;
-});
-// Load by default
-tracks.forEach((t) => {
-  createSongEl(t);
-});
-loadTrack(0);
 
 // Load track funtion
 function loadTrack(index) {
@@ -169,7 +130,7 @@ function goPrev() {
   audio.play();
 }
 
-// When a song ends, honor repeat mode
+// When a song ends, repeat mode
 
 audio.addEventListener("ended", () => {
   if (repeatMode === "one") {
@@ -177,37 +138,106 @@ audio.addEventListener("ended", () => {
     audio.play();
   } else if (repeatMode === "all") {
     goNext();
-  } else {
-    // off: stop at end or go next—your choice
-    // goNext(); // optional
-  }
+  } 
 });
 
-// Playing time bar functionality 
+// Playing time bar functionality
 
-const timeElStart  = document.querySelector('.time span:first-child');
-const timeElEnd    = document.querySelector('.time span:last-child');
-const barContainer = document.querySelector('.timecontain');
-const barFill      = document.querySelector('.timeshow');
+const timeElStart = document.querySelector(".time span:first-child");
+const timeElEnd = document.querySelector(".time span:last-child");
+const barContainer = document.querySelector(".timecontain");
+const barFill = document.querySelector(".timeshow");
 
 function formatTime(sec) {
-  if (!Number.isFinite(sec)) return '0:00';
+  if (!Number.isFinite(sec)) {
+    return "0:00";
+  }
   const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  const s = Math.floor(sec % 60)
+    .toString()
+    .padStart(2, "0");
   return `${m}:${s}`;
 }
-audio.addEventListener('loadedmetadata', () => {
+audio.addEventListener("loadedmetadata", () => {
   timeElEnd.textContent = formatTime(audio.duration);
 });
-audio.addEventListener('timeupdate', () => {
+audio.addEventListener("timeupdate", () => {
   timeElStart.textContent = formatTime(audio.currentTime);
   const ratio = audio.duration ? audio.currentTime / audio.duration : 0;
-  barFill.style.width = `${ratio * 100}%`; // you styled .timeshow to fill the bar
+  barFill.style.width = `${ratio * 100}%`; // 
 });
-barContainer.addEventListener('click', (e) => {
+barContainer.addEventListener("click", (e) => {
   const rect = barContainer.getBoundingClientRect();
   const ratio = (e.clientX - rect.left) / rect.width;
   if (audio.duration) {
     audio.currentTime = ratio * audio.duration;
   }
 });
+
+// What is loaded on page load
+
+const tracks = [
+  {
+    title: "Specialz",
+    artist: "Jujutsu Kaisen",
+    source: "mp3/King_Gnu_-_SPECIALZ_English_cover_(mp3.pm).mp3",
+    cover: "thumbs/specials.jpg",
+  },
+  {
+    title: "Heavy is the crown",
+    artist: "Linkin Park",
+    source: "mp3/Heavy Is The Crown.mp3",
+    cover: "thumbs/heavy_is_the_crown_thumb.jpg",
+  },
+  {
+    title: "Awaken",
+    artist: "League of Legends",
+    source: "mp3/League of Legends - Awaken.mp3",
+    cover: "thumbs/league class.jpeg",
+  },
+  {
+    title: "Legends never die (remix)",
+    artist: "League of Legends",
+    source: "mp3/League of Legends - Legends Never Die - (Remix).mp3",
+    cover: "thumbs/league class.jpeg",
+  },
+  {
+    title: "Legends never die",
+    artist: "League of Legends",
+    source: "mp3/League of Legends - Legends Never Die.mp3",
+    cover: "thumbs/league class.jpeg",
+  },
+  {
+    title: "Rise - (remix)",
+    artist: "League of Legends",
+    source: "mp3/League of Legends - RISE - Remix.mp3",
+    cover: "thumbs/rise.jpg",
+  },
+  {
+    title: "Rise",
+    artist: "League of Legends",
+    source: "mp3/League of Legends - RISE.mp3",
+    cover: "thumbs/rise.jpg",
+  },
+  {
+    title: "Warriors",
+    artist: "League of Legends",
+    source: "mp3/League of Legends - Warriors.mp3",
+    cover: "thumbs/league class.jpeg",
+  },
+  {
+    title: "Where our blue is",
+    artist: "Tatsuya Kitani",
+    source:
+      "mp3/Diego_Mitre_Music_-_Jujutsu_Kaisen_Season_2_OP_Ao_no_Sumika_Where_Our_Blue_Is_Orc_(mp3.pm).mp3",
+    cover: "thumbs/WhereOurBlueIsNormal.jpg",
+  },
+];
+tracks.forEach((track, index) => {
+  track.trackIndex = index;
+});
+// Load by default
+tracks.forEach((t) => {
+  createSongEl(t);
+});
+loadTrack(0);
